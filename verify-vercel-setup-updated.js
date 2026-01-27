@@ -40,10 +40,10 @@ if (allGood) {
   // Check React/React DOM versions compatibility
   const hasReact = packageJson.dependencies && packageJson.dependencies.react;
   const hasReactDOM = packageJson.dependencies && packageJson.dependencies['react-dom'];
-  
+
   if (hasReact && hasReactDOM) {
     console.log('✅ React and React DOM found in dependencies');
-    
+
     // Check if versions are compatible with Next.js 14
     if (hasReact.includes('^18') && hasReactDOM.includes('^18')) {
       console.log('✅ React and React DOM versions are compatible with Next.js 14');
@@ -54,6 +54,17 @@ if (allGood) {
   } else {
     console.log('❌ React or React DOM not found in dependencies');
     allGood = false;
+  }
+
+  // Check Node.js engine version
+  if (packageJson.engines && packageJson.engines.node) {
+    if (packageJson.engines.node.includes('24.x')) {
+      console.log('✅ Node.js engine version is compatible with Vercel');
+    } else {
+      console.log('⚠️  Node.js engine version might not be optimal for Vercel');
+    }
+  } else {
+    console.log('⚠️  Node.js engine version not specified in package.json');
   }
 }
 
@@ -94,7 +105,7 @@ if (allGood) {
   console.log('🎉 All checks passed! Your project should deploy successfully to Vercel.');
   console.log('\nKey changes made:');
   console.log('- Downgraded React and React DOM to v18 (compatible with Next.js 14)');
-  console.log('- Set Node.js engine to 18.x');
+  console.log('- Set Node.js engine to 24.x (compatible with Vercel)');
   console.log('- Simplified vercel.json to use zero-configuration');
   console.log('- Removed duplicate app directory');
   console.log('\nTo deploy, make sure you have the Vercel CLI installed:');
