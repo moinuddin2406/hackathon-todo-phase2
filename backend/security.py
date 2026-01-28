@@ -18,8 +18,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def hash_password(password: str) -> str:
     """
     Hash a plaintext password.
+    Truncate to 72 characters to comply with bcrypt limitations.
     """
-    return pwd_context.hash(password)
+    # Truncate password to 72 characters to comply with bcrypt limitations
+    truncated_password = password[:72] if len(password) > 72 else password
+    return pwd_context.hash(truncated_password)
 
 
 def verify_user_owns_resource(user_id: str, resource: Any) -> bool:

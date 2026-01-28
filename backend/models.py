@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 from sqlalchemy import Column, DateTime
 from sqlalchemy.sql import func
+from pydantic import field_validator
 
 
 class TaskBase(SQLModel):
@@ -47,6 +48,13 @@ class User(UserBase, table=True):
 
 class UserCreate(UserBase):
     password: str
+
+    @field_validator('password')
+    @classmethod
+    def validate_password_length(cls, v):
+        if len(v) > 72:
+            raise ValueError('Password must not exceed 72 characters')
+        return v
 
 
 class UserPublic(UserBase):
