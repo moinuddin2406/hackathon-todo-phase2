@@ -1,3 +1,4 @@
+import hashlib
 from fastapi import HTTPException, status
 from typing import Dict, Any
 from models import Task
@@ -11,18 +12,21 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verify a plaintext password against a hashed password.
+    Uses SHA-256 pre-hashing to handle passwords longer than 72 bytes.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    # Pre-hash the plain password with SHA-256 to handle long passwords
+    password_digest = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
+    return pwd_context.verify(password_digest, hashed_password)
 
 
 def hash_password(password: str) -> str:
     """
     Hash a plaintext password.
-    Truncate to 72 characters to comply with bcrypt limitations.
+    Uses SHA-256 pre-hashing to handle passwords longer than 72 bytes.
     """
-    # Truncate password to 72 characters to comply with bcrypt limitations
-    truncated_password = password[:72] if len(password) > 72 else password
-    return pwd_context.hash(truncated_password)
+    # Pre-hash the password with SHA-256 to handle long passwords
+    password_digest = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    return pwd_context.hash(password_digest)
 
 
 def verify_user_owns_resource(user_id: str, resource: Any) -> bool:
