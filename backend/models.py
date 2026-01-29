@@ -49,13 +49,6 @@ class User(UserBase, table=True):
 class UserCreate(UserBase):
     password: str
 
-    @field_validator('password')
-    @classmethod
-    def validate_password_length(cls, v):
-        if len(v) > 72:
-            raise ValueError('Password must not exceed 72 characters')
-        return v
-
 
 class UserPublic(UserBase):
     id: str
