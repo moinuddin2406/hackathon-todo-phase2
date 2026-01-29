@@ -45,11 +45,13 @@ def read_root():
 def health_check():
     return {"status": "healthy"}
 
+# Import at the top level to avoid issues in Hugging Face environment
+from security import hash_password, verify_password
+import inspect
+
 @app.get("/debug/verification")
 def verification_endpoint():
     """Debug endpoint to verify the bcrypt fix is properly deployed"""
-    from security import hash_password, verify_password
-    import inspect
     import sys
 
     # Test the implementation
