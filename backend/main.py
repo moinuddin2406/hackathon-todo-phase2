@@ -50,6 +50,7 @@ def verification_endpoint():
     """Debug endpoint to verify the bcrypt fix is properly deployed"""
     from security import hash_password, verify_password
     import inspect
+    import sys
 
     # Test the implementation
     test_password = "test_password_longer_than_72_chars_" + "x" * 50  # Total > 72 chars
@@ -69,6 +70,7 @@ def verification_endpoint():
             "hash_function_uses_sha_prehash": has_sha_prehash,
             "verify_function_uses_sha_prehash": verify_has_sha_prehash,
             "test_password_length": len(test_password),
+            "python_version": sys.version,
             "message": "Bcrypt 72-byte fix verification" if has_sha_prehash else "Old implementation detected!"
         }
     except Exception as e:
@@ -77,6 +79,35 @@ def verification_endpoint():
             "error": str(e),
             "message": "Error during bcrypt fix verification"
         }
+
+@app.get("/debug/detailed")
+def detailed_debug_endpoint():
+    """More detailed debug endpoint to help troubleshoot the bcrypt issue"""
+    import inspect
+    from security import hash_password, verify_password
+    import os
+
+    # Get the actual file path where the security module is located
+    security_module_file = inspect.getfile(hash_password)
+
+    # Get the source code of the functions
+    hash_func_source = inspect.getsource(hash_password)
+    verify_func_source = inspect.getsource(verify_password)
+
+    # Check if the fix is implemented
+    has_sha_prehash = "hashlib.sha256" in hash_func_source and "hexdigest()" in hash_func_source
+    verify_has_sha_prehash = "hashlib.sha256" in verify_func_source and "hexdigest()" in verify_func_source
+
+    return {
+        "security_module_location": security_module_file,
+        "working_directory": os.getcwd(),
+        "hash_function_has_sha_prehash": has_sha_prehash,
+        "verify_function_has_sha_prehash": verify_has_sha_prehash,
+        "hash_function_source_preview": hash_func_source[:200] + "...",
+        "verify_function_source_preview": verify_func_source[:200] + "...",
+        "environment": dict(os.environ),
+        "fix_correctly_implemented": has_sha_prehash and verify_has_sha_prehash
+    }
 
 # Add global exception handlers for common HTTP errors
 @app.exception_handler(401)
